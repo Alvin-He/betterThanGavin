@@ -76,24 +76,26 @@ def gameLoop():
   global currentPlayer, data
   try: 
     x = int(input('Player ' + str(currentPlayer) + ' please enter a number:'))
-    if x > 6 or x < 0: Exception()
-    for y in range(Y_total - 1, 0 - 1, -1):
-      if data[x][y] == ' ' * 3: 
-        if currentPlayer == 1: data[x][y] = ' X '
-        else: data[x][y] = ' O '
-        render()
-        if checkForWin(x, y): 
-          print('player: ' + str(currentPlayer) + ' win')
-          input('Press Something to continue playing or CTRL + C to exit.')
-          data = genDataStructure()
-          currentPlayer = 1
-          Exception()
-        currentPlayer += 1
-        if currentPlayer > 2: currentPlayer = 1
-        break
   except:
-    render()
+    pass
+  else: 
+    if not (x > 6 or x < 0):
+      for y in range(Y_total - 1, 0 - 1, -1):
+        if data[x][y] == ' ' * 3: 
+          if currentPlayer == 1: data[x][y] = ' X '
+          else: data[x][y] = ' O '
+          if checkForWin(x, y): 
+            render()
+            writef('player: ' + str(currentPlayer) + ' win')
+            input('Press Something to continue playing or CTRL + C to exit.')
+            data = genDataStructure()
+            currentPlayer = 1
+            break
+          currentPlayer += 1
+          if currentPlayer > 2: currentPlayer = 1
+          break
   finally:
+    render()
     gameLoop()
 
 def main():

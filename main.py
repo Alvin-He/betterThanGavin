@@ -8,13 +8,13 @@ v_bar = '|'
 X_total = 7
 Y_total = 6
 
-data = [([' ' * 3] * Y_total).copy() for i in range(X_total)]
-
-currentPlayer = 1
-
 def clear(): os.system('cls' if os.name in ('nt', 'dos') else 'clear')
+def genDataStructure(): return [([' ' * 3] * Y_total).copy() for i in range(X_total)]
 def write(s = ''): sys.stdout.write(str(s))
 def writef(s = ''): write(str(s) + '\n')
+
+data = genDataStructure()
+currentPlayer = 1
 
 def render():
   clear()
@@ -31,61 +31,73 @@ def render():
     write(i)
     write(' ' * 3)  
 
-  playerInput()
-
 def checkSlot(x,y):
+  if x < 0 or y < 0 or x >= X_total or y >= Y_total: return 0 
   slot = data[x][y]
-  if slot == 'X':
+  if slot == ' X ':
     return 1
-  elif slot == 'O':
+  elif slot == ' O ':
     return 2
+  else: return 0
 
 
-def checkNearBySlots(x,y, matched= 0):
-  result = checkSlot(x, y)
-  if result:
-    if result == currentPlayer: 
-      matched += 1
-      if matched == 4: return True
-    YPossible = [x, y + 1]
-    XPossible = [x + 1, y]
-    RPossible = [x + 1, y + 1]
-    if (
-      checkNearBySlots(x, y + 1, matched) or \
-      checkNearBySlots(x + 1, y, matched) or \
-      checkNearBySlots(x + 1, y + 1, matched)
-    ): return True
+def checkNearBySlots(xStart, yStart, xIncerment, yIncerment, _matches = 1):
+  xStart += xIncerment
+  yStart += yIncerment
+  if checkSlot(xStart, yStart) == currentPlayer:
+    _matches += 1
+    if _matches == 4: return True
+    else: return checkNearBySlots(xStart, yStart, xIncerment, yIncerment, _matches)
+  else: 
+    return False
+  
+  
+
+def checkForWin(x ,y):
+  if(checkNearBySlots(x, y, 1, 0) # positive x direction
+  or checkNearBySlots(x, y,-1, 0) # negative x direction
+
+  or checkNearBySlots(x, y, 0, 1) # positive y direction
+  or checkNearBySlots(x, y, 0,-1) # negative y direction
+
+  or checkNearBySlots(x, y, 1, 1) # upper y = x direction 
+  or checkNearBySlots(x, y,-1,-1) # lower y = x direction
+
+  or checkNearBySlots(x, y,-1, 1) # upper y = -x direction
+  or checkNearBySlots(x, y, 1,-1) # lower y = -x direction
+  ): return True
   else: return False
-
-def checkForWin():
-  if checkNearBySlots(0,0): 
-    writef()
-    writef('Player ' + str(currentPlayer) + 'WIN!')
-    sys.exit()
+  
 
 
 
-def playerInput():
+def gameLoop():
   writef()
-  try:
-    global currentPlayer
+  global currentPlayer, data
+  try: 
     x = int(input('Player ' + str(currentPlayer) + ' please enter a number:'))
-    if x > 6 or x < 0: raise Exception()
+    if x > 6 or x < 0: Exception()
     for y in range(Y_total - 1, 0 - 1, -1):
       if data[x][y] == ' ' * 3: 
         if currentPlayer == 1: data[x][y] = ' X '
         else: data[x][y] = ' O '
-        checkForWin()
+        render()
+        if checkForWin(x, y): 
+          print('player: ' + str(currentPlayer) + ' win')
+          input('Press Something to continue playing or CTRL + C to exit.')
+          data = genDataStructure()
+          currentPlayer = 1
+          Exception()
         currentPlayer += 1
         if currentPlayer > 2: currentPlayer = 1
         break
-  finally: 
+  except:
     render()
-    # playerInput()
+  finally:
+    gameLoop()
 
 def main():
-  render()
-  
-
+  render() # render the board first
+  gameLoop() # then start the game loop
 
 main()

@@ -87,7 +87,10 @@ def gameLoop():
           if checkForWin(x, y): 
             render()
             writef('player: ' + str(currentPlayer) + ' win')
-            input('Press Something to continue playing or CTRL + C to exit.')
+            try:
+              ui = input('Press Something to continue playing or CTRL + C to exit.')
+            except KeyboardInterrupt: 
+              sys.exit()
             data = genDataStructure()
             currentPlayer = 1
             break
